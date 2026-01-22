@@ -666,7 +666,7 @@ BaiTapTuan1_TypeScript/
     </td>
     <td align="center">
       <img src="screenshots/image.png" width="280"/><br/>
-      <em>Màn hình loading</em>
+      <em>Màn hình giới thiệu cá nhân</em>
     </td>
   </tr>
   <tr>
