@@ -1,12 +1,13 @@
-// Design system based on Vietnamese food service theme
-// Colors: Warm red palette for appetite and Vietnamese culture
-// Typography: Be Vietnam Pro for native feel
+// Design system supporting multiple themes:
+// 1. Food Service screens (Intro, Welcome, Login, Register) - Red vibrant theme
+// 2. HomePage (Personal Intro) - Red theme with professional styling
+// Colors: Warm red palette for appetite and Vietnamese culture + professional feel
 
 export const COLORS = {
-  // Primary palette - Red theme for food service
-  primary: "#DC2626", // Vibrant red
-  secondary: "#F87171", // Light red
-  accent: "#CA8A04", // Gold/Yellow for CTA
+  // Primary palette - Red theme for consistency across app
+  primary: "#DC2626", // Vibrant red (used for: hero bg, buttons, accents, icons)
+  secondary: "#F87171", // Light red (accent backgrounds)
+  accent: "#CA8A04", // Gold/Yellow for secondary CTA
 
   // Semantic colors
   success: "#059669",
@@ -18,7 +19,7 @@ export const COLORS = {
   white: "#FFFFFF",
   black: "#000000",
 
-  // Grays
+  // Grays (neutral palette for cards, text, borders)
   gray50: "#F9FAFB",
   gray100: "#F3F4F6",
   gray200: "#E5E7EB",
@@ -30,12 +31,12 @@ export const COLORS = {
   gray800: "#1F2937",
   gray900: "#111827",
 
-  // Background & Text (from design system)
-  background: "#FEF2F2", // Light red tint
-  surface: "#FFFFFF",
-  text: "#450A0A", // Dark red
-  textSecondary: "#7C2D12",
-  textLight: "#9CA3AF",
+  // Background & Text
+  background: "#FAFAFA", // Light neutral (works for both themes)
+  surface: "#FFFFFF", // Card backgrounds
+  text: "#09090B", // Almost black (professional text for HomePage)
+  textSecondary: "#6B7280", // Gray for secondary text
+  textLight: "#9CA3AF", // Light gray for muted text
 
   // Overlays
   overlay: "rgba(0, 0, 0, 0.5)",

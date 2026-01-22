@@ -1,31 +1,42 @@
 # Đặc Sản Việt Mobile App
 
-Ứng dụng React Native TypeScript cho dịch vụ đặc sản Việt Nam với giao diện hiện đại, vibrant và tối ưu trải nghiệm người dùng.
+Ứng dụng React Native TypeScript cho dịch vụ đặc sản Việt Nam với giao diện hiện đại, vibrant và tối ưu trải nghiệm người dùng. App bao gồm intro screen (10s) tự động chuyển đến homepage giới thiệu bản thân.
 
 ## ✨ Tính năng chính
 
-- **Intro Screen**: Loading thương hiệu với animation mượt mà (10s)
+- **Intro Screen** (10s): Loading thương hiệu với animation mượt mà → tự động chuyển sang Homepage
 - **Welcome Screen**: Hero landing page với features và CTA buttons
 - **Login**: Đăng nhập bằng email/username với validation
 - **Register**: Form đăng ký đầy đủ với 6 trường thông tin
-- **Homepage**: Dashboard hiển thị thông tin user và quick actions
+- **Homepage**: Personal profile intro với thông tin cá nhân, sở thích, kỹ năng lập trình, và liên hệ
 
 ## 🎨 Design System (2026 Redesign)
 
-### Theme: Vietnamese Food Service
+### Theme: Vietnamese Food Service + Personal Portfolio
 
-- **Primary Color**: `#DC2626` (Vibrant Red)
-- **Secondary Color**: `#F87171` (Light Red)
-- **Accent/CTA**: `#CA8A04` (Gold)
-- **Background**: `#FEF2F2` (Light Red Tint)
+**Primary Color**: `#DC2626` (Vibrant Red)  
+**Secondary Color**: `#F87171` (Light Red)  
+**Accent/CTA**: `#CA8A04` (Gold)  
+**Background**: `#FAFAFA` (Light Neutral)  
+**Text**: `#09090B` (Professional Black)
 
-### Style: Vibrant & Block-based
+### Style: Vibrant & Block-based (Screens 1-4) + Professional Profile (Screen 5)
 
+Screens 1-4 (Intro, Welcome, Login, Register):
 - Bold, energetic, playful design
 - Geometric shapes với high contrast
 - Large sections (48px+ gaps)
-- Smooth transitions (200-300ms)
-- Rounded corners (8-24px)
+- Red vibrant theme
+- Spring animations (200-300ms)
+
+Screen 5 (Homepage):
+- Personal profile intro page
+- Clean, professional layout
+- Motion-driven entrance animations (800ms)
+- Hero section with gradient red background
+- Sections: Bio Info, Interests, Skills, Contact
+- Skill bars with progress indicators
+- Card-based design with shadows
 
 ### Typography
 
@@ -35,11 +46,12 @@
 
 ### Key Features
 
-- ✅ Accessibility labels trên mọi interactive elements
-- ✅ Smooth animations với spring effects
-- ✅ Consistent shadows và elevation
+- ✅ Motion-driven entrance animations (Animated API)
+- ✅ Accessibility labels on all interactive elements
+- ✅ Smooth animations with spring effects
+- ✅ Consistent shadows and elevation
 - ✅ Focus states rõ ràng
-- ✅ No emojis - chỉ FontAwesome icons
+- ✅ No emojis - FontAwesome icons only
 - ✅ Responsive flexbox layout
 
 ## 🚀 Cài đặt & Chạy
@@ -153,13 +165,89 @@ Intro (10s) → Welcome → Login/Register → Homepage
 - Real-time validation
 - Reusable input component
 
-### 5. HomepageScreen
+### 5. HomepageScreen - Personal Profile Intro
 
-- Hero header với gradient background
-- Profile avatar với status badge
-- Info cards với user details
-- Quick actions grid (Cập nhật, Cài đặt, Trợ giúp)
-- Logout button
+**When**: Auto-appears after IntroScreen (10s)  
+**Pattern**: Personal Profile Portfolio Grid  
+**Animation**: Motion-driven entrance (800ms fade + slide + scale)
+
+#### Sections:
+
+1. **Hero Section** (Entrance Animation)
+   - Gradient red background (#DC2626)
+   - White avatar box with user icon
+   - Name, Role, School displayed
+   - Spring scale animation with fade-in
+
+2. **Personal Info Card** (Thông tin cá nhân)
+   - Icon: info-circle (blue)
+   - Fields: Họ tên, Tuổi, Nghiệp vụ, Trường, Chuyên ngành
+   - Clean row layout with dividers
+   - Responsive text sizing
+
+3. **Interests Section** (Sở thích)
+   - Icon: heart (red)
+   - Checkmark list (✓) of interests
+   - 4 interest items by default
+   - Scrollable if more items added
+
+4. **Skills Section** (Kỹ năng lập trình)
+   - Icon: code (gold)
+   - Skill bars with percentage (0-100%)
+   - Color-coded per skill:
+     - TypeScript/React Native: #61DAFB (blue)
+     - JavaScript/ES6+: #F7DF1E (yellow)
+     - HTML/CSS: #E34C26 (orange)
+     - Git/GitHub: #FF6B14 (coral)
+     - Mobile Development: #3DDC84 (green)
+   - 5 skills included
+   - Animated fill bars (can add animations later)
+
+5. **Contact Section** (Liên hệ)
+   - Icon: envelope (info blue)
+   - Touchable contact rows:
+     - Email
+     - Phone
+     - Username
+   - Icon indicators for each field
+
+6. **Footer**
+   - Copyright text
+   - Design credit
+
+#### Animations:
+
+```typescript
+// Entrance Animation Pattern
+Animated.parallel([
+  Animated.timing(fadeAnim, { toValue: 1, duration: 800 }),
+  Animated.timing(slideAnim, { toValue: 0, duration: 800 }),
+  Animated.spring(scaleAnim, { tension: 20, friction: 7 }),
+]).start();
+```
+
+- **Fade In**: 0 → 1 opacity
+- **Slide Down**: 50px translateY → 0
+- **Scale Pop**: 0.8 → 1 with spring physics
+
+All sections animate together on mount.
+
+#### Styling:
+
+- Background: Light gray (#FAFAFA)
+- Cards: White with shadows
+- Text: Professional black (#09090B)
+- Icons: FontAwesome only (no emojis)
+- Spacing: 24px gaps (SIZES.lg)
+- Borders: Subtle gray dividers
+
+#### Accessibility:
+
+- ✅ All touchables have `accessibilityRole="button"`
+- ✅ Contact items have `accessibilityLabel` with full info
+- ✅ Semantic HTML-like structure
+- ✅ Proper color contrast (WCAG AA)
+- ✅ No reliance on color alone for meaning
 
 ## 🎨 Design Principles
 
