@@ -574,10 +574,6 @@ BaiTapTuan1_TypeScript/
       <img src="screenshots/loadingScreen.png" width="280"/><br/>
       <em>Màn hình loading</em>
     </td>
-    <td align="center">
-      <img src="screenshots/homePage.png" width="280"/><br/>
-      <em>Giao diện trang chủ giới thiệu bản thân</em>
-    </td>
   </tr>
   <tr>
     <td align="center">
