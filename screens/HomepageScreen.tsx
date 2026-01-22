@@ -46,15 +46,15 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
 
   // Mock user data
   const userData = {
-    name: "Nguyễn Nhật Thiên",
+    name: "Trương Công Anh",
     role: "Sinh viên IT",
     school: "ĐH Công nghệ Kỹ thuật TPHCM",
     age: 20,
     major: "Sinh viên IT",
     field: "Công nghệ thông tin",
-    email: "nhat.thien@example.com",
+    email: "truongconganh5575@gmail.com",
     phone: "+84 123 456 789",
-    username: "nguyenthien",
+    username: "conganh",
   };
 
   const interests = [
@@ -89,10 +89,7 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
           styles.heroSection,
           {
             opacity: fadeAnim,
-            transform: [
-              { translateY: slideAnim },
-              { scale: scaleAnim },
-            ],
+            transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
           },
         ]}
       >
@@ -270,7 +267,9 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>Đặc Sản Việt © 2026</Text>
-        <Text style={styles.footerSubText}>Designed with Motion-Driven Portfolio</Text>
+        <Text style={styles.footerSubText}>
+          Designed with Motion-Driven Portfolio
+        </Text>
       </View>
     </ScrollView>
   );

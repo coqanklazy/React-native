@@ -23,6 +23,7 @@
 ### Style: Vibrant & Block-based (Screens 1-4) + Professional Profile (Screen 5)
 
 Screens 1-4 (Intro, Welcome, Login, Register):
+
 - Bold, energetic, playful design
 - Geometric shapes với high contrast
 - Large sections (48px+ gaps)
@@ -30,6 +31,7 @@ Screens 1-4 (Intro, Welcome, Login, Register):
 - Spring animations (200-300ms)
 
 Screen 5 (Homepage):
+
 - Personal profile intro page
 - Clean, professional layout
 - Motion-driven entrance animations (800ms)
@@ -660,6 +662,10 @@ BaiTapTuan1_TypeScript/
   <tr>
     <td align="center">
       <img src="screenshots/loadingScreen.png" width="280"/><br/>
+      <em>Màn hình loading</em>
+    </td>
+    <td align="center">
+      <img src="screenshots/image.png" width="280"/><br/>
       <em>Màn hình loading</em>
     </td>
   </tr>
