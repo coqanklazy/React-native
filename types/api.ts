@@ -64,6 +64,7 @@ export interface OTPSendResponse {
 export interface SendRegistrationOTPRequest {
   email: string;
   fullName?: string;
+  username: string;
 }
 
 export interface VerifyRegistrationOTPRequest {

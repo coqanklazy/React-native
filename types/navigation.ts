@@ -3,6 +3,13 @@ export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Register: undefined;
+  VerifyRegisterOTP: {
+    email: string;
+    fullName: string;
+    username: string;
+    password: string;
+    phoneNumber?: string;
+  };
   ForgotPassword: undefined;
   Homepage: undefined;
 };
@@ -10,7 +17,10 @@ export type RootStackParamList = {
 export type NavigationProps = {
   navigation: {
     replace: (screen: keyof RootStackParamList) => void;
-    navigate: (screen: keyof RootStackParamList) => void;
+    navigate: <K extends keyof RootStackParamList>(
+      screen: K,
+      params?: RootStackParamList[K]
+    ) => void;
     goBack: () => void;
   };
 };

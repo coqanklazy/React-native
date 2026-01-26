@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,24 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
   const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0); // 60 giây cooldown
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
 
   const validateEmail = () => {
     if (!email.trim()) {
@@ -63,6 +81,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
       const response = await ApiService.sendPasswordResetOTP({ email: email.trim() });
       if (response.success) {
         setOtpSent(true);
+        setResendCooldown(60); // Bắt đầu cooldown 60 giây
         Alert.alert("Thành công", "Mã OTP đã được gửi đến email của bạn");
       } else {
         Alert.alert("Lỗi", response.message || "Gửi OTP thất bại");
@@ -179,12 +198,16 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
         </View>
 
         <View style={styles.formCard}>
-          {renderInput("Email", email, setEmail, "envelope", "example@email.com", {
+          {!otpSent && renderInput("Email", email, setEmail, "envelope", "example@email.com", {
             keyboardType: "email-address",
           })}
 
           {otpSent && (
             <>
+              <View style={styles.emailInfoSection}>
+                <Text style={styles.emailInfoLabel}>Mã OTP đã được gửi đến</Text>
+                <Text style={styles.emailInfoText}>{email}</Text>
+              </View>
               {renderInput("Mã OTP", otpCode, setOtpCode, "key", "Nhập mã OTP", {
                 keyboardType: "number-pad",
               })}
@@ -193,7 +216,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                 newPassword,
                 setNewPassword,
                 "lock",
-                "••••••••",
+                "••••••••••",
                 { secure: true, showToggle: true },
               )}
               {renderInput(
@@ -201,7 +224,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
                 confirmPassword,
                 setConfirmPassword,
                 "lock",
-                "••••••••",
+                "••••••••••",
                 { secure: true, showToggle: true },
               )}
             </>
@@ -231,12 +254,24 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ navigation 
 
           {otpSent && (
             <TouchableOpacity
-              style={styles.secondaryButton}
+              style={[
+                styles.secondaryButton,
+                (loading || resendCooldown > 0) && styles.disabledButton,
+              ]}
               onPress={handleSendOTP}
               activeOpacity={0.75}
-              disabled={loading}
+              disabled={loading || resendCooldown > 0}
             >
-              <Text style={styles.secondaryButtonText}>Gửi lại OTP</Text>
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  (loading || resendCooldown > 0) && styles.disabledButtonText,
+                ]}
+              >
+                {resendCooldown > 0
+                  ? `Gửi lại sau ${resendCooldown}s`
+                  : "Gửi lại OTP"}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -307,6 +342,23 @@ const styles = StyleSheet.create({
     padding: SIZES.lg,
     ...SHADOWS.xl,
   },
+  emailInfoSection: {
+    backgroundColor: COLORS.gray50,
+    borderRadius: SIZES.radiusMd,
+    padding: SIZES.md,
+    marginBottom: SIZES.md,
+    alignItems: "center",
+  },
+  emailInfoLabel: {
+    ...FONTS.body2,
+    color: COLORS.textSecondary,
+    marginBottom: SIZES.xs,
+  },
+  emailInfoText: {
+    ...FONTS.body1,
+    color: COLORS.primary,
+    fontWeight: "700",
+  },
   inputWrapper: {
     marginBottom: SIZES.md,
   },
@@ -364,6 +416,9 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+  disabledButtonText: {
+    color: COLORS.textLight,
   },
   primaryButtonText: {
     ...FONTS.h4,

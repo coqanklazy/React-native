@@ -29,10 +29,8 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegisterS
     confirmPassword: "",
     fullName: "",
     phoneNumber: "",
-    otpCode: "",
   });
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -41,29 +39,15 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegisterS
   };
 
   const validateSendOTP = () => {
-    const { email, fullName } = formData;
-    if (!email.trim() || !fullName.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập họ tên và email trước khi gửi OTP");
+    const { username, email, password, confirmPassword, fullName } = formData;
+
+    if (!username.trim() || !email.trim() || !password.trim() || !fullName.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin bắt buộc");
       return false;
     }
-    if (!email.includes("@")) {
-      Alert.alert("Lỗi", "Email không hợp lệ");
-      return false;
-    }
-    return true;
-  };
 
-  const validateForm = () => {
-    const { username, email, password, confirmPassword, fullName, otpCode } = formData;
-
-    if (
-      !username.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !fullName.trim() ||
-      !otpCode.trim()
-    ) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin bắt buộc và mã OTP");
+    if (username.length < 3) {
+      Alert.alert("Lỗi", "Tên đăng nhập phải có ít nhất 3 ký tự");
       return false;
     }
 
@@ -82,11 +66,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegisterS
       return false;
     }
 
-    if (username.length < 3) {
-      Alert.alert("Lỗi", "Tên đăng nhập phải có ít nhất 3 ký tự");
-      return false;
-    }
-
     return true;
   };
 
@@ -97,57 +76,19 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegisterS
       const response = await ApiService.sendRegistrationOTP({
         email: formData.email.trim(),
         fullName: formData.fullName.trim(),
+        username: formData.username.trim(),
       });
       if (response.success) {
-        setOtpSent(true);
-        Alert.alert("Thành công", "Mã OTP đã được gửi đến email của bạn");
+        // Chuyển hướng đến màn hình nhập OTP
+        navigation.navigate("VerifyRegisterOTP", {
+          email: formData.email.trim(),
+          fullName: formData.fullName.trim(),
+          username: formData.username.trim(),
+          password: formData.password,
+          phoneNumber: formData.phoneNumber.trim() || undefined,
+        });
       } else {
         Alert.alert("Lỗi", response.message || "Gửi OTP thất bại");
-      }
-    } catch (error) {
-      Alert.alert("Lỗi", "Có lỗi xảy ra. Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!otpSent) {
-      Alert.alert("Thông báo", "Vui lòng gửi và nhập mã OTP trước khi đăng ký.");
-      return;
-    }
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-    try {
-      const { confirmPassword, ...registerData } = formData;
-      const response = await ApiService.verifyRegistrationOTP({
-        ...registerData,
-        username: registerData.username.trim(),
-        email: registerData.email.trim(),
-        fullName: registerData.fullName.trim(),
-        phoneNumber: registerData.phoneNumber.trim() || undefined,
-        otpCode: registerData.otpCode.trim(),
-      });
-
-      if (response.success) {
-        Alert.alert(
-          "Thành công",
-          "Đăng ký thành công. Đăng nhập ngay nào!",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                // Navigate to Login screen for user to login with new account
-                // Don't call onRegisterSuccess - let user login manually
-                navigation.navigate("Login");
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert("Lỗi", response.message || "Đăng ký thất bại");
       }
     } catch (error) {
       Alert.alert("Lỗi", "Có lỗi xảy ra. Vui lòng thử lại.");
@@ -281,52 +222,35 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegisterS
             "••••••••",
             { secure: true, showToggle: true },
           )}
-          {otpSent &&
-            renderInput("Mã OTP", "otpCode", "key", "Nhập mã OTP", {
-              keyboardType: "numeric",
-            })}
 
-          {!otpSent && (
-            <Text style={styles.helperText}>
-              Chúng tôi sẽ gửi mã OTP 6 số đến email của bạn để xác thực đăng ký.
-            </Text>
-          )}
+          <Text style={styles.helperText}>
+            Chúng tôi sẽ gửi mã OTP 6 số đến email của bạn để xác thực đăng ký.
+          </Text>
 
           {/* Register Button */}
           <TouchableOpacity
             style={[styles.registerButton, loading && styles.disabledButton]}
-            onPress={otpSent ? handleRegister : handleSendOTP}
+            onPress={handleSendOTP}
             disabled={loading}
             activeOpacity={0.8}
             accessibilityRole="button"
-            accessibilityLabel="Đăng ký tài khoản"
+            accessibilityLabel="Gửi OTP"
           >
             {loading ? (
               <ActivityIndicator color={COLORS.white} size="small" />
             ) : (
               <>
                 <FontAwesome
-                  name={otpSent ? "user-plus" : "paper-plane"}
+                  name="paper-plane"
                   size={20}
                   color={COLORS.white}
                 />
                 <Text style={styles.registerButtonText}>
-                  {otpSent ? "Hoàn tất đăng ký" : "Gửi OTP"}
+                  Gửi OTP
                 </Text>
               </>
             )}
           </TouchableOpacity>
-
-          {otpSent && (
-            <TouchableOpacity
-              style={styles.resendButton}
-              onPress={handleSendOTP}
-              disabled={loading}
-              activeOpacity={0.75}
-            >
-              <Text style={styles.resendText}>Gửi lại OTP</Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* Footer */}

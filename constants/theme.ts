@@ -6,6 +6,7 @@
 export const COLORS = {
   // Primary palette - Red theme for consistency across app
   primary: "#DC2626", // Vibrant red (used for: hero bg, buttons, accents, icons)
+  primaryLight: "#FEE2E2", // Very light red (backgrounds)
   secondary: "#F87171", // Light red (accent backgrounds)
   accent: "#CA8A04", // Gold/Yellow for secondary CTA
 

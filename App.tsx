@@ -8,6 +8,7 @@ import IntroScreen from './screens/IntroScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import VerifyRegisterOTPScreen from './screens/VerifyRegisterOTPScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import HomepageScreen from './screens/HomepageScreen';
 import { RootStackParamList } from './types/navigation';
@@ -130,6 +131,13 @@ export default function App(): React.JSX.Element {
             <RegisterScreen {...props} onRegisterSuccess={handleLoginSuccess} />
           )}
         </Stack.Screen>
+        <Stack.Screen
+          name="VerifyRegisterOTP"
+          component={VerifyRegisterOTPScreen}
+          options={{
+            animationEnabled: !isLoggedIn,
+          }}
+        />
         <Stack.Screen
           name="ForgotPassword"
           component={ForgotPasswordScreen}
