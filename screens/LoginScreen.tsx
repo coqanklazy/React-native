@@ -16,9 +16,11 @@ import { NavigationProps } from "../types/navigation";
 import { ApiService } from "../services/api";
 import { COLORS, SIZES, FONTS, SHADOWS } from "../constants/theme";
 
-interface LoginScreenProps extends NavigationProps {}
+interface LoginScreenProps extends NavigationProps {
+  onLoginSuccess?: () => void;
+}
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, onLoginSuccess }) => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +41,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       if (response.success) {
         Alert.alert("Thành công", "Đăng nhập thành công!", [
-          { text: "OK", onPress: () => navigation.replace("Homepage") },
+          {
+            text: "OK",
+            onPress: () => {
+              if (onLoginSuccess) {
+                onLoginSuccess();
+              } else {
+                navigation.replace("Homepage");
+              }
+            },
+          },
         ]);
       } else {
         Alert.alert("Lỗi", response.message || "Đăng nhập thất bại");
@@ -107,6 +118,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 onChangeText={setEmailOrUsername}
                 autoCapitalize="none"
                 autoCorrect={false}
+                spellCheck={false}
                 accessibilityLabel="Nhập email hoặc username"
               />
             </View>
@@ -135,6 +147,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                autoCorrect={false}
+                spellCheck={false}
+                autoComplete="off"
+                textContentType={Platform.OS === "ios" ? "oneTimeCode" : "none"}
+                keyboardType="default"
                 accessibilityLabel="Nhập mật khẩu"
               />
               <TouchableOpacity
@@ -154,6 +171,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          <TouchableOpacity
+            style={styles.forgotButton}
+            onPress={() => navigation.navigate("ForgotPassword")}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+          </TouchableOpacity>
 
           {/* Login Button */}
           <TouchableOpacity
@@ -286,6 +311,15 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     padding: SIZES.sm,
+  },
+  forgotButton: {
+    alignSelf: "flex-end",
+    marginTop: SIZES.sm,
+  },
+  forgotText: {
+    ...FONTS.body2,
+    color: COLORS.primary,
+    fontWeight: "500",
   },
 
   // Buttons

@@ -10,15 +10,18 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  KeyboardTypeOptions,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { NavigationProps } from "../types/navigation";
 import { ApiService } from "../services/api";
 import { COLORS, SIZES, FONTS, SHADOWS } from "../constants/theme";
 
-interface RegisterScreenProps extends NavigationProps {}
+interface RegisterScreenProps extends NavigationProps {
+  onRegisterSuccess?: () => void;
+}
 
-const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation, onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -26,25 +29,41 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
     confirmPassword: "",
     fullName: "",
     phoneNumber: "",
+    otpCode: "",
   });
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const validateSendOTP = () => {
+    const { email, fullName } = formData;
+    if (!email.trim() || !fullName.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập họ tên và email trước khi gửi OTP");
+      return false;
+    }
+    if (!email.includes("@")) {
+      Alert.alert("Lỗi", "Email không hợp lệ");
+      return false;
+    }
+    return true;
+  };
+
   const validateForm = () => {
-    const { username, email, password, confirmPassword, fullName } = formData;
+    const { username, email, password, confirmPassword, fullName, otpCode } = formData;
 
     if (
       !username.trim() ||
       !email.trim() ||
       !password.trim() ||
-      !fullName.trim()
+      !fullName.trim() ||
+      !otpCode.trim()
     ) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin bắt buộc");
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin bắt buộc và mã OTP");
       return false;
     }
 
@@ -71,25 +90,63 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
     return true;
   };
 
+  const handleSendOTP = async () => {
+    if (!validateSendOTP()) return;
+    setLoading(true);
+    try {
+      const response = await ApiService.sendRegistrationOTP({
+        email: formData.email.trim(),
+        fullName: formData.fullName.trim(),
+      });
+      if (response.success) {
+        setOtpSent(true);
+        Alert.alert("Thành công", "Mã OTP đã được gửi đến email của bạn");
+      } else {
+        Alert.alert("Lỗi", response.message || "Gửi OTP thất bại");
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Có lỗi xảy ra. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRegister = async () => {
+    if (!otpSent) {
+      Alert.alert("Thông báo", "Vui lòng gửi và nhập mã OTP trước khi đăng ký.");
+      return;
+    }
+
     if (!validateForm()) return;
 
     setLoading(true);
     try {
       const { confirmPassword, ...registerData } = formData;
-      const response = await ApiService.register({
+      const response = await ApiService.verifyRegistrationOTP({
         ...registerData,
         username: registerData.username.trim(),
         email: registerData.email.trim(),
         fullName: registerData.fullName.trim(),
         phoneNumber: registerData.phoneNumber.trim() || undefined,
+        otpCode: registerData.otpCode.trim(),
       });
 
       if (response.success) {
         Alert.alert(
           "Thành công",
-          "Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay bây giờ.",
-          [{ text: "OK", onPress: () => navigation.navigate("Login") }],
+          "Đăng ký thành công. Đăng nhập ngay nào!",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                if (onRegisterSuccess) {
+                  onRegisterSuccess();
+                } else {
+                  navigation.navigate("Login");
+                }
+              },
+            },
+          ]
         );
       } else {
         Alert.alert("Lỗi", response.message || "Đăng ký thất bại");
@@ -110,16 +167,16 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
       secure?: boolean;
       showToggle?: boolean;
       optional?: boolean;
-      keyboardType?: string;
+      keyboardType?: KeyboardTypeOptions;
     },
   ) => {
     const value = formData[field];
     const isPasswordField = field === "password" || field === "confirmPassword";
-    const showValue = isPasswordField
-      ? field === "password"
-        ? showPassword
-        : showConfirmPassword
-      : undefined;
+
+    // Xác định xem có đang hiển thị mật khẩu hay không
+    const isCurrentlyVisible = isPasswordField
+      ? (field === "password" ? showPassword : showConfirmPassword)
+      : true;
 
     return (
       <View style={styles.inputWrapper}>
@@ -141,10 +198,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
             placeholderTextColor={COLORS.textLight}
             value={value}
             onChangeText={(text) => handleInputChange(field, text)}
-            secureTextEntry={options?.secure && !showValue}
-            autoCapitalize={field === "email" ? "none" : "words"}
+            secureTextEntry={!!options?.secure && !isCurrentlyVisible}
+            autoCapitalize={options?.secure || field === "email" ? "none" : "words"}
             autoCorrect={false}
-            keyboardType={(options?.keyboardType as any) || "default"}
+            spellCheck={false}
+            autoComplete={options?.secure ? "off" : undefined}
+            textContentType={options?.secure ? (Platform.OS === "ios" ? "oneTimeCode" : "none") : "none"}
+            keyboardType={options?.keyboardType || "default"}
             accessibilityLabel={`Nhập ${label.toLowerCase()}`}
           />
           {options?.showToggle && (
@@ -156,10 +216,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               }}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel={showValue ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              accessibilityLabel={isCurrentlyVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
             >
               <FontAwesome
-                name={showValue ? "eye" : "eye-slash"}
+                name={isCurrentlyVisible ? "eye" : "eye-slash"}
                 size={20}
                 color={COLORS.textLight}
               />
@@ -223,11 +283,21 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
             "••••••••",
             { secure: true, showToggle: true },
           )}
+          {otpSent &&
+            renderInput("Mã OTP", "otpCode", "key", "Nhập mã OTP", {
+              keyboardType: "numeric",
+            })}
+
+          {!otpSent && (
+            <Text style={styles.helperText}>
+              Chúng tôi sẽ gửi mã OTP 6 số đến email của bạn để xác thực đăng ký.
+            </Text>
+          )}
 
           {/* Register Button */}
           <TouchableOpacity
             style={[styles.registerButton, loading && styles.disabledButton]}
-            onPress={handleRegister}
+            onPress={otpSent ? handleRegister : handleSendOTP}
             disabled={loading}
             activeOpacity={0.8}
             accessibilityRole="button"
@@ -237,11 +307,28 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               <ActivityIndicator color={COLORS.white} size="small" />
             ) : (
               <>
-                <FontAwesome name="user-plus" size={20} color={COLORS.white} />
-                <Text style={styles.registerButtonText}>Đăng Ký</Text>
+                <FontAwesome
+                  name={otpSent ? "user-plus" : "paper-plane"}
+                  size={20}
+                  color={COLORS.white}
+                />
+                <Text style={styles.registerButtonText}>
+                  {otpSent ? "Hoàn tất đăng ký" : "Gửi OTP"}
+                </Text>
               </>
             )}
           </TouchableOpacity>
+
+          {otpSent && (
+            <TouchableOpacity
+              style={styles.resendButton}
+              onPress={handleSendOTP}
+              disabled={loading}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.resendText}>Gửi lại OTP</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Footer */}
@@ -358,6 +445,12 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: SIZES.sm,
   },
+  helperText: {
+    ...FONTS.body2,
+    color: COLORS.textSecondary,
+    marginBottom: SIZES.md,
+    textAlign: "center",
+  },
 
   // Buttons
   registerButton: {
@@ -377,6 +470,15 @@ const styles = StyleSheet.create({
   registerButtonText: {
     ...FONTS.h4,
     color: COLORS.white,
+  },
+  resendButton: {
+    marginTop: SIZES.sm,
+    alignSelf: "center",
+  },
+  resendText: {
+    ...FONTS.body2,
+    color: COLORS.primary,
+    fontWeight: "700",
   },
 
   // Footer

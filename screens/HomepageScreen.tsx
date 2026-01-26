@@ -14,13 +14,13 @@ import { COLORS, SIZES, FONTS, SHADOWS } from "../constants/theme";
 
 const { width } = Dimensions.get("window");
 
-interface HomepageScreenProps extends NavigationProps {}
+interface HomepageScreenProps extends NavigationProps {
+  onLogout?: () => void;
+}
 
-const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
-  // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation, onLogout }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Entrance animation
@@ -57,12 +57,32 @@ const HomepageScreen: React.FC<HomepageScreenProps> = ({ navigation }) => {
     username: "conganh",
   };
 
-  const interests = [
-    "Lập trình ứng dụng di động",
-    "Học hỏi công nghệ mới",
-    "Chơi game và xem phim",
-    "Du lịch và khám phá",
-  ];
+  const handleLogout = () => {
+    Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Đăng xuất",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await ApiService.logout();
+            if (onLogout) {
+              onLogout();
+            } else {
+              navigation.replace("Welcome");
+            }
+          } catch (error) {
+            console.log("Logout error:", error);
+            if (onLogout) {
+              onLogout();
+            } else {
+              navigation.replace("Welcome");
+            }
+          }
+        },
+      },
+    ]);
+  };
 
   const skills = [
     { name: "TypeScript/React Native", level: 85, color: "#61DAFB" },
@@ -284,17 +304,21 @@ const styles = StyleSheet.create({
     paddingVertical: SIZES.xl,
   },
 
-  // Hero Section
-  heroSection: {
-    marginHorizontal: SIZES.lg,
-    marginBottom: SIZES.xl,
+
+  // Hero Header
+  heroHeader: {
+    position: "relative",
+    paddingTop: 60,
+    // Increase bottom padding so text isn't overlapped by the card
+    paddingBottom: SIZES.xxxl || SIZES.xxl + 24,
   },
   heroBackground: {
     position: "absolute",
     top: 0,
-    left: -SIZES.lg,
-    right: -SIZES.lg,
-    height: 280,
+
+    left: 0,
+    right: 0,
+    height: 320, // slightly taller background to ensure visual separation
     backgroundColor: COLORS.primary,
     borderBottomLeftRadius: SIZES.radiusXl,
     borderBottomRightRadius: SIZES.radiusXl,
@@ -337,11 +361,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: "center",
     marginBottom: SIZES.xs,
+    textAlign: "center",
   },
   schoolText: {
     ...FONTS.body2,
     color: COLORS.white,
-    opacity: 0.9,
+    opacity: 0.95, // make it a bit more readable on the header
     textAlign: "center",
   },
 
@@ -350,8 +375,10 @@ const styles = StyleSheet.create({
     marginHorizontal: SIZES.lg,
     marginBottom: SIZES.lg,
     backgroundColor: COLORS.white,
-    borderRadius: SIZES.radiusLg,
-    ...SHADOWS.md,
+    borderRadius: SIZES.radiusXl,
+    // Remove negative margin that caused overlap over the hero area
+    marginTop: SIZES.md,
+    ...SHADOWS.xl,
   },
   cardHeader: {
     flexDirection: "row",

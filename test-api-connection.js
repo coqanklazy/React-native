@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const API_BASE_URL = 'http://10.0.244.132:8082/api';
+const API_BASE_URL = 'http://10.0.244.132:3001/api';
 
 async function testAPIConnection() {
   console.log('Testing API connection...');
